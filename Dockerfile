@@ -6,6 +6,8 @@
 # Docker images based on latest CentOS version
 #
 FROM centos:7
+ARG REPO_USER
+ARG REPO_PASSWORD
  
 #
 # My email address as the maintainer of this Docker image
@@ -20,11 +22,10 @@ USER root
 #
 RUN yum -y install sudo \
   && sudo rpm -Uvh http://yum.enterprisedb.com/edbrepos/edb-repo-20-1.noarch.rpm \
-  && export YUM_USER=<<PUT HERE THE REPOSITORY USER>> \
-  && export YUM_PASSWORD=<<PUT HERE THE REPOSITORY PASSWORD>> \
+  && export YUM_USER=${REPO_USER} \
+  && export YUM_PASSWORD=${REPO_PASSWORD} \
   && sed -i "s/<username>:<password>/$YUM_USER:$YUM_PASSWORD/g" /etc/yum.repos.d/edb.repo \
-#  && sed -i "\/ppas95/,/gpgcheck/ s/enabled=0/enabled=1/" /etc/yum.repos.d/edb.repo \
-  && yum -y install ppas95-server 
+  && yum -y install ppas94-server 
  
 #
 # Set the user to be enterprisedb at this point
@@ -37,10 +38,10 @@ USER enterprisedb
 # line at the end of the file
 #
 RUN echo "enterprisedb" > /tmp/password \
-   && /usr/ppas-9.5/bin/initdb -D /var/lib/ppas/9.5/data --pwfile=/tmp/password \
-   && echo "host   all   all   0.0.0.0/0   md5" >> /var/lib/ppas/9.5/data/pg_hba.conf
+   && /usr/ppas-9.4/bin/initdb -D /var/lib/ppas/9.4/data --pwfile=/tmp/password \
+   && echo "host   all   all   0.0.0.0/0   md5" >> /var/lib/ppas/9.4/data/pg_hba.conf
  
 #
 # Default command which will start Postgres in this container
 #
-CMD ["/usr/ppas-9.5/bin/edb-postgres", "-D", "/var/lib/ppas/9.5/data", "-h", "*"]
+CMD ["/usr/ppas-9.4/bin/edb-postgres", "-D", "/var/lib/ppas/9.4/data", "-h", "*"]
